@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="codemirror-5.65.17/lib/codemirror.css">
+    <script src="codemirror-5.65.17/lib/codemirror.js"></script>
+    <script src="codemirror-5.65.17/mode/python/python.js"></script>
+    <link rel="stylesheet" href="codemirror-5.65.17/theme/base16-dark.css">
+    <script src="codemirror-5.65.17/addon/edit/closebrackets.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="row m-3">
+        <div class="col">
+            <div class="d-flex justify-content-between mb-2">
+                <div class="col-12 w-25 ">
+                    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+                    <select class="form-select" id="autoSizingSelect">
+                      <option selected>Choose...</option>
+                      <option value="Java">Java</option>
+                      <option value="C++">C++</option>
+                      <option value="Python">Python</option>
+                    </select>
+                  </div>
+                  <div>
+                    <button type="button" class="btn btn-success" onclick="executeCode()">Coding Sprint</button>
+                    <button type="button" class="btn btn-success" onclick="executeCode()"><i class="bi bi-play-fill"></i>
+                    </button>
+                  </div>
+            </div>
+          <textarea id="editor" class="form-control" aria-label="First name"></textarea>
+        </div>
+        <div class="col d-flex flex-column rounded bg-dark px-4">
+            <div class="h-50">
+                <label for="Input" class="text-light mt-4 mb-2">Input</label>
+                <textarea id="inputArea" class="form-control h-75" aria-label="Last name"></textarea>
+            </div>
+            <div class="h-50">
+                <label for="Output" class="text-light mb-2">Output</label>
+                <textarea id="outputArea" class="form-control h-75" aria-label="Last name" readonly></textarea>
+            </div>
+        </div>
+      </div>
+
+    <script>
+        var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+            mode: "python",
+            theme: "base16-dark",
+            lineNumbers: true,
+            autoCloseBrackets: true,
+        });
+        var width = window.innerWidth;
+        editor.setSize(0.7 * width, "500");
+
+        function executeCode() {
+            const code = editor.getValue();
+            const inputArea = document.getElementById("inputArea");
+            const outputArea = document.getElementById("outputArea");
+
+            fetch("http://15.206.163.220:8000/execute", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                outputArea.value = "Output:\n" + data.output + "\nErrors:\n" + data.errors;
+            })
+            .catch(error => {
+                outputArea.value = "Error: " + error;
+            });
+        }
+    </script>
+</body>
+</html>
